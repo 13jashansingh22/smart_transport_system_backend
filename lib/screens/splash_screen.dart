@@ -10,7 +10,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -18,9 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void startTimer() {
-
     Future.delayed(const Duration(seconds: 3), () {
-
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -29,56 +26,47 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         );
       }
-
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-
-      backgroundColor: Colors.indigo,
-
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          children: [
-
-            const Icon(
-              Icons.directions_bus,
-              size: 120,
-              color: Colors.white,
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              "Smart Transport System",
-              style: TextStyle(
-                fontSize: 26,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            const CircularProgressIndicator(
-              color: Colors.white,
-            ),
-
-          ],
-
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.surface,
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
+          ),
         ),
-
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.directions_bus,
+                size: 120,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Smart Transport System",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 30),
+              CircularProgressIndicator(
+                color: colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
       ),
-
     );
-
   }
-
 }

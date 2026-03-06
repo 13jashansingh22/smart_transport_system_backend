@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
+import 'routes_list_screen.dart';
 
 class RoutesScreen extends StatelessWidget {
   const RoutesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Routes")),
-      body: const Center(
-        child: Text("Bus Routes"),
-      ),
-    );
+    return const RoutesListScreen();
   }
 }

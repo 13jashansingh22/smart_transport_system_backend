@@ -20,7 +20,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     setState(() {
 
-      messages.add("You: " + controller.text);
+      messages.add("You: ${controller.text}");
 
       messages.add("Bot: Help request received");
 
@@ -42,9 +42,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
           setState(() {
 
-            messages.add("Help: " + text);
+            messages.add("Help: $text");
 
-            messages.add("Bot: Opening " + text);
+            messages.add("Bot: Opening $text");
 
           });
 

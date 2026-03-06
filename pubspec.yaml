@@ -28,6 +28,8 @@ dependencies:
 
   # Google Maps (Navigation Screen)
   google_maps_flutter: ^2.6.0
+  google_maps_flutter_android: ^2.8.0
+  google_maps_flutter_ios: ^2.6.0
 
   # Login
   google_sign_in: ^6.2.1
@@ -36,6 +38,7 @@ dependencies:
   camera: ^0.10.5+9
   google_mlkit_face_detection: ^0.10.0
   image_picker: ^1.1.2
+  flutter_windowmanager: ^0.2.0
 
 dev_dependencies:
   flutter_test:
