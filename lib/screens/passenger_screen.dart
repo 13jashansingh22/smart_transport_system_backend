@@ -4,9 +4,45 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/bus_routes_repository.dart';
 import '../services/smart_transport_ai_service.dart';
+import '../services/user_profile_context_service.dart';
 
 class PassengerScreen extends StatelessWidget {
   const PassengerScreen({super.key});
+
+  Widget _profileContextCard(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return FutureBuilder<UserProfileContext?>(
+      future: UserProfileContextService.read(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        if (profile == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Card(
+          child: ListTile(
+            leading: Icon(Icons.location_city, color: colorScheme.primary),
+            title: Text('${profile.town}, ${profile.city}'),
+            subtitle: Text('State: ${profile.state} • Role: ${profile.role}'),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                'Profile',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: colorScheme.primary),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _triggerSos(BuildContext context) async {
     final service = SmartTransportAIService.instance;
@@ -123,12 +159,16 @@ class PassengerScreen extends StatelessWidget {
       required String label,
       required String value,
       required Color accentColor}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF151F29),
+        color: colorScheme.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF2A3948)),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -186,31 +226,32 @@ class PassengerScreen extends StatelessWidget {
                 subtitle: const Text('Features arranged in sequence'),
               ),
               const Divider(),
-              _navTile(context, Icons.location_on, '1. Live GPS Tracking',
+              _navTile(context, Icons.map_rounded, '1. City-wise Live Bus Map',
+                  '/city-map'),
+              _navTile(context, Icons.gps_fixed_rounded, '2. Live GPS Tracking',
                   '/trackbus'),
+              _navTile(context, Icons.alt_route_rounded, '3. Routes & Stops',
+                  '/routes'),
               _navTile(
-                  context, Icons.alt_route, '2. Routes & Stops', '/routes'),
-              _navTile(context, Icons.schedule, '3. Schedule', '/schedule'),
-              _navTile(context, Icons.confirmation_number, '4. QR Ticketing',
-                  '/tickets'),
-              _navTile(context, Icons.notifications, '5. Real-Time Alerts',
-                  '/alerts'),
-              _navTile(context, Icons.auto_awesome, '6. AI Features',
+                  context, Icons.schedule_rounded, '4. Schedule', '/schedule'),
+              _navTile(context, Icons.qr_code_scanner_rounded,
+                  '5. Smart Ticketing (QR)', '/tickets'),
+              _navTile(context, Icons.event_seat_rounded,
+                  '6. Seat Availability', '/tickets'),
+              _navTile(context, Icons.notifications_active_rounded,
+                  '7. Real-Time Alerts', '/alerts'),
+              _navTile(context, Icons.auto_awesome_rounded, '8. AI Features',
                   '/ai-features'),
-              _navTile(context, Icons.receipt, '7. Digital Ticket Booking',
-                  '/tickets'),
-              _navTile(context, Icons.event_seat, '8. Smart Seat Availability',
-                  '/tickets'),
+              _navTile(context, Icons.record_voice_over_rounded,
+                  '9. Voice & Offline Tools', '/ai-features'),
+              _navTile(context, Icons.receipt_long_rounded, '10. My Tickets',
+                  '/mytickets'),
               _navTile(
-                  context, Icons.mic, '9. Voice Assistant', '/ai-features'),
-              _navTile(context, Icons.offline_bolt, '10. Offline Mode',
-                  '/ai-features'),
-              _navTile(context, Icons.feedback, '11. Feedback & Ratings',
-                  '/ai-features'),
-              _navTile(context, Icons.receipt, '12. My Tickets', '/mytickets'),
-              _navTile(context, Icons.history, '13. History', '/history'),
-              _navTile(context, Icons.person, '14. Profile', '/profile'),
-              _navTile(context, Icons.help, '15. Help', '/help'),
+                  context, Icons.history_rounded, '11. History', '/history'),
+              _navTile(
+                  context, Icons.person_rounded, '12. Profile', '/profile'),
+              _navTile(
+                  context, Icons.help_outline_rounded, '13. Help', '/help'),
             ],
           ),
         ),
@@ -226,7 +267,7 @@ class PassengerScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF10161D),
+              colorScheme.primary.withValues(alpha: 0.06),
               colorScheme.surface,
               Theme.of(context).scaffoldBackgroundColor,
             ],
@@ -242,7 +283,7 @@ class PassengerScreen extends StatelessWidget {
                   colors: [
                     colorScheme.primary.withValues(alpha: 0.18),
                     colorScheme.secondary.withValues(alpha: 0.18),
-                    const Color(0xFF16202A),
+                    colorScheme.surface,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -294,6 +335,8 @@ class PassengerScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
+            _profileContextCard(context),
+            const SizedBox(height: 8),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -343,10 +386,10 @@ class PassengerScreen extends StatelessWidget {
             const SizedBox(height: 8),
             _quickCard(
               context,
-              title: 'Live GPS Bus Tracking',
-              subtitle: 'Track current bus movement and ETA on map.',
+              title: 'City-wise Live Bus Map',
+              subtitle: 'Select any India state and city to track route buses.',
               icon: Icons.location_searching,
-              route: '/trackbus',
+              route: '/city-map',
               accentColor: colorScheme.primary,
             ),
             _quickCard(
@@ -371,7 +414,7 @@ class PassengerScreen extends StatelessWidget {
               subtitle: 'Arrival, delay and route-change alerts.',
               icon: Icons.notifications_active,
               route: '/alerts',
-              accentColor: const Color(0xFFFF8A65),
+              accentColor: colorScheme.secondary,
             ),
             _quickCard(
               context,
@@ -380,7 +423,7 @@ class PassengerScreen extends StatelessWidget {
                   'Use GPS to detect nearest stop and search routes/stops.',
               icon: Icons.near_me,
               route: '/routes',
-              accentColor: const Color(0xFF64B5F6),
+              accentColor: colorScheme.primary,
             ),
             _quickCard(
               context,
@@ -389,7 +432,7 @@ class PassengerScreen extends StatelessWidget {
                   'Feedback analytics, voice assistant and offline route info.',
               icon: Icons.record_voice_over,
               route: '/ai-features',
-              accentColor: const Color(0xFFAED581),
+              accentColor: colorScheme.tertiary,
             ),
             Card(
               child: Padding(

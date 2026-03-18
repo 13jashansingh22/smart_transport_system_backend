@@ -17,6 +17,7 @@ import 'screens/conductor_screen.dart';
 
 /// Passenger Features
 import 'screens/passenger/track_bus_screen.dart';
+import 'screens/passenger_mapscreen.dart';
 import 'screens/passenger/routes_screen.dart';
 import 'screens/passenger/schedule_screen.dart';
 import 'screens/passenger/ticket_screen.dart';
@@ -63,27 +64,27 @@ class MyApp extends StatelessWidget {
 
   ThemeData _buildTheme() {
     const colorScheme = ColorScheme.dark(
-      primary: Color(0xFFFFC107),
-      onPrimary: Color(0xFF271900),
-      secondary: Color(0xFFE53935),
+      primary: Color(0xFF4F8CFF),
+      onPrimary: Color(0xFF021534),
+      secondary: Color(0xFF7C4DFF),
       onSecondary: Colors.white,
-      tertiary: Color(0xFF26A69A),
-      surface: Color(0xFF18212B),
-      onSurface: Color(0xFFF6F1E8),
-      error: Color(0xFFFF5252),
+      tertiary: Color(0xFF2EC4B6),
+      surface: Color(0xFF111B26),
+      onSurface: Color(0xFFE8EEF7),
+      error: Color(0xFFFF6B6B),
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: const Color(0xFF0F141B),
-      canvasColor: const Color(0xFF131B24),
-      dividerColor: const Color(0xFF2E3A46),
+      scaffoldBackgroundColor: const Color(0xFF09121C),
+      canvasColor: const Color(0xFF0F1A26),
+      dividerColor: const Color(0xFF27384A),
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Color(0xFF131B24),
-        foregroundColor: Color(0xFFF6F1E8),
+        backgroundColor: Color(0xFF0F1A26),
+        foregroundColor: Color(0xFFE8EEF7),
       ),
       textTheme: const TextTheme(
         headlineSmall: TextStyle(
@@ -117,16 +118,16 @@ class MyApp extends StatelessWidget {
         displayColor: colorScheme.onSurface,
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFF17202A),
+        color: const Color(0xFF132131),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
-          side: const BorderSide(color: Color(0xFF293542)),
+          side: const BorderSide(color: Color(0xFF2A3F53)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF19222C),
+        fillColor: const Color(0xFF162433),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
@@ -134,11 +135,11 @@ class MyApp extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF364454)),
+          borderSide: const BorderSide(color: Color(0xFF2E455B)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFFFC107), width: 1.4),
+          borderSide: const BorderSide(color: Color(0xFF4F8CFF), width: 1.4),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -157,25 +158,25 @@ class MyApp extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           foregroundColor: colorScheme.onSurface,
-          side: const BorderSide(color: Color(0xFF465566)),
+          side: const BorderSide(color: Color(0xFF3A536A)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF1D2833),
+        backgroundColor: const Color(0xFF152434),
         contentTextStyle: TextStyle(color: colorScheme.onSurface),
         behavior: SnackBarBehavior.floating,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: Color(0xFFE53935),
+        backgroundColor: Color(0xFF7C4DFF),
         foregroundColor: Colors.white,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFF1E2834),
+        backgroundColor: const Color(0xFF18283A),
         selectedColor: colorScheme.primary.withValues(alpha: 0.18),
-        side: const BorderSide(color: Color(0xFF334150)),
+        side: const BorderSide(color: Color(0xFF31485F)),
         labelStyle: TextStyle(color: colorScheme.onSurface),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
@@ -203,6 +204,7 @@ class MyApp extends StatelessWidget {
 
         /// Passenger
         '/trackbus': (context) => const TrackBusScreen(),
+        '/city-map': (context) => const PassengerMapScreen(),
         '/routes': (context) => const RoutesScreen(),
         '/schedule': (context) => const ScheduleScreen(),
         '/tickets': (context) => const TicketScreen(),

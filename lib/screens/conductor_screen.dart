@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/bus_routes_repository.dart';
 import '../services/smart_transport_ai_service.dart';
+import '../services/user_profile_context_service.dart';
 
 class ConductorScreen extends StatefulWidget {
   const ConductorScreen({super.key});
@@ -26,6 +27,34 @@ class _ConductorScreenState extends State<ConductorScreen> {
   bool abruptMotion = false;
   bool harshBraking = false;
   int selectedPanel = 0;
+
+  Widget _profileContextCard(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return FutureBuilder<UserProfileContext?>(
+      future: UserProfileContextService.read(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        if (profile == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Card(
+          child: ListTile(
+            leading: Icon(Icons.location_city, color: colorScheme.primary),
+            title: Text('${profile.town}, ${profile.city}'),
+            subtitle: Text('State: ${profile.state} • Role: ${profile.role}'),
+            trailing: Text(
+              'Localized',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(color: colorScheme.primary),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -90,7 +119,7 @@ class _ConductorScreenState extends State<ConductorScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF0F141B),
+                  colorScheme.primary.withValues(alpha: 0.06),
                   colorScheme.surface,
                   Theme.of(context).scaffoldBackgroundColor,
                 ],
@@ -105,6 +134,8 @@ class _ConductorScreenState extends State<ConductorScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _profileContextCard(context),
+                        const SizedBox(height: 12),
                         _buildHeroCard(context, route, report, crowdPercentage),
                         const SizedBox(height: 18),
                         if (!showRail) _buildTopSelector(colorScheme),
@@ -134,9 +165,11 @@ class _ConductorScreenState extends State<ConductorScreen> {
       width: 104,
       margin: const EdgeInsets.fromLTRB(16, 16, 0, 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF131B24),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF293542)),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: SafeArea(
         child: Column(
@@ -151,7 +184,7 @@ class _ConductorScreenState extends State<ConductorScreen> {
               ),
               child: const Icon(
                 Icons.confirmation_number_rounded,
-                color: Color(0xFF271900),
+                color: Colors.white,
                 size: 30,
               ),
             ),
@@ -171,13 +204,13 @@ class _ConductorScreenState extends State<ConductorScreen> {
                 groupAlignment: -0.9,
                 indicatorColor: colorScheme.primary.withValues(alpha: 0.16),
                 selectedIconTheme: IconThemeData(color: colorScheme.primary),
-                unselectedIconTheme:
-                    const IconThemeData(color: Color(0xFF93A2B2)),
+                unselectedIconTheme: IconThemeData(
+                    color: colorScheme.onSurface.withValues(alpha: 0.65)),
                 selectedLabelTextStyle: TextStyle(
                   color: colorScheme.primary,
                 ),
-                unselectedLabelTextStyle:
-                    const TextStyle(color: Color(0xFF93A2B2)),
+                unselectedLabelTextStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.65)),
                 onDestinationSelected: (index) {
                   setState(() => selectedPanel = index);
                 },

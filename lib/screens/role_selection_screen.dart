@@ -74,7 +74,7 @@ class RoleSelectionScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF10161D),
+              colorScheme.primary.withValues(alpha: 0.08),
               colorScheme.surface,
               Theme.of(context).scaffoldBackgroundColor,
             ],
@@ -170,7 +170,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 'Navigation, route control, and live operating tools.',
                 Icons.drive_eta,
                 const DriverLoginScreen(),
-                const Color(0xFFE53935),
+                colorScheme.secondary,
               ),
               roleButton(
                 context,
@@ -178,7 +178,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 'Boarding, ticket validation, and rider coordination.',
                 Icons.confirmation_number,
                 const ConductorLoginScreen(),
-                const Color(0xFF26A69A),
+                colorScheme.tertiary,
               ),
               roleButton(
                 context,
@@ -186,7 +186,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 'Control center analytics and transport operations.',
                 Icons.admin_panel_settings,
                 const _AdminRedirectScreen(),
-                const Color(0xFF90A4AE),
+                colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ],
           ),
