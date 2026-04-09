@@ -1,7 +1,6 @@
-const dotenv = require("dotenv");
+require("dotenv").config();
 const { createApp } = require("../src/app");
 
-dotenv.config();
 
 const app = createApp();
 
