@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart' as ll;
 
 import '../models/bus_routes_repository.dart';
+import '../services/firestore_bus_location_service.dart';
 import '../services/smart_transport_ai_service.dart';
 import '../services/user_profile_context_service.dart';
 
@@ -16,6 +17,7 @@ class DriverScreen extends StatefulWidget {
 
 class _DriverScreenState extends State<DriverScreen> {
   final service = SmartTransportAIService.instance;
+  final firestoreLocationService = FirestoreBusLocationService.instance;
 
   ll.LatLng location = const ll.LatLng(28.6139, 77.2090);
   bool tracking = false;
@@ -27,6 +29,12 @@ class _DriverScreenState extends State<DriverScreen> {
   double steeringVariation = 0.4;
   double trafficFactor = 0.2;
   int selectedPanel = 0;
+
+  @override
+  void dispose() {
+    firestoreLocationService.stopPeriodicUpdates();
+    super.dispose();
+  }
 
   Widget _profileContextCard(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -551,12 +559,24 @@ class _DriverScreenState extends State<DriverScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           setState(() => tracking = true);
-                          service.shareDriverLocation(
-                            busId: route.id,
-                            location: gmaps.LatLng(
-                              location.latitude,
-                              location.longitude,
-                            ),
+                          firestoreLocationService.startPeriodicUpdates(
+                            interval: const Duration(seconds: 5),
+                            busDocumentId: 'bus_1',
+                            onLocationUpdated: (latitude, longitude, speed) {
+                              if (!mounted) {
+                                return;
+                              }
+                              setState(() {
+                                location = ll.LatLng(latitude, longitude);
+                              });
+                              service.shareDriverLocation(
+                                busId: route.id,
+                                location: gmaps.LatLng(latitude, longitude),
+                              );
+                            },
+                            onError: (error) {
+                              debugPrint('Driver location sync error: $error');
+                            },
                           );
                           service.addTripHistory(
                             driverId: 'D-101',
@@ -573,6 +593,7 @@ class _DriverScreenState extends State<DriverScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           setState(() => tracking = false);
+                          firestoreLocationService.stopPeriodicUpdates();
                           service.addTripHistory(
                             driverId: 'D-101',
                             routeId: route.id,

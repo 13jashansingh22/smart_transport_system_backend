@@ -48,6 +48,14 @@ app.*.map.json
 /android/.gradle/
 /android/.gradle-local/
 /android/.gradle-user-home/
+/android/local.properties
+/android/key.properties
+*.jks
+*.keystore
+
+# Local environment files
+.env
+.env.*
 
 # iOS local build artifacts and dependencies
 /ios/Pods/
