@@ -106,11 +106,29 @@ class _SplashScreenState extends State<SplashScreen> {
                                       .withValues(alpha: 0.28),
                                 ),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.asset(
-                                  'assets/images/app_logo_bus.png',
-                                  fit: BoxFit.cover,
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.easeInOut,
+                                builder: (context, value, child) {
+                                  final scale = 0.9 + (0.1 * value);
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.scale(
+                                      scale: scale,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Image.asset(
+                                      'assets/images/logo.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

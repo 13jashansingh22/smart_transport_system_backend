@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/bus_routes_repository.dart';
 import '../../services/smart_transport_ai_service.dart';
+import '../../widgets/branded_app_bar_title.dart';
 
 class TransportControlDashboardScreen extends StatefulWidget {
   const TransportControlDashboardScreen({super.key});
@@ -81,7 +82,7 @@ class _TransportControlDashboardScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Command Center'),
+        title: const BrandedAppBarTitle(title: 'Admin Command Center'),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/help'),
@@ -267,12 +268,15 @@ class _TransportControlDashboardScreenState
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.admin_panel_settings_rounded,
-                  color: Color(0xFF271900),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

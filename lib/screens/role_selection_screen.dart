@@ -113,9 +113,13 @@ class RoleSelectionScreen extends StatelessWidget {
                               color: colorScheme.primary.withValues(alpha: 0.5),
                             ),
                           ),
-                          child: Image.asset(
-                            'assets/images/app_logo_bus.png',
-                            fit: BoxFit.cover,
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 14),

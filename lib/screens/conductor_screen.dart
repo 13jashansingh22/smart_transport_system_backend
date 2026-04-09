@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/bus_routes_repository.dart';
 import '../services/smart_transport_ai_service.dart';
 import '../services/user_profile_context_service.dart';
+import '../widgets/branded_app_bar_title.dart';
 
 class ConductorScreen extends StatefulWidget {
   const ConductorScreen({super.key});
@@ -75,7 +76,7 @@ class _ConductorScreenState extends State<ConductorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conductor Command Center'),
+        title: const BrandedAppBarTitle(title: 'Conductor Command Center'),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/help'),
@@ -261,12 +262,15 @@ class _ConductorScreenState extends State<ConductorScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.confirmation_number_rounded,
-                  color: Color(0xFF271900),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

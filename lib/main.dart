@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'firebase_options.dart';
+import 'services/local_bus_alert_notification_service.dart';
 
 /// Splash
 import 'screens/splash_screen.dart';
@@ -55,6 +56,7 @@ void main() async {
   }
 
   await _enableScreenProtection();
+  await LocalBusAlertNotificationService.instance.initialize();
 
   runApp(const MyApp());
 }

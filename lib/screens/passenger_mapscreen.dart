@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fmap;
@@ -8,7 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/bus_route.dart';
 import '../models/bus_routes_repository.dart';
 import '../services/live_bus_simulator_service.dart';
+import '../services/local_bus_alert_notification_service.dart';
 import '../services/location_service.dart';
+import '../widgets/branded_app_bar_title.dart';
 import 'passenger/track_bus_screen.dart';
 
 class PassengerMapScreen extends StatefulWidget {
@@ -35,12 +40,15 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
     'IT Park': LatLng(30.7289, 76.8387),
   };
 
-  final LiveBusSimulatorService _liveBusSimulator =
-      LiveBusSimulatorService.instance;
   final fmap.MapController _fallbackController = fmap.MapController();
   final TextEditingController _searchController = TextEditingController();
   final PageController _panelController = PageController();
   final Distance _distance = const Distance();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _busesSubscription;
+  List<SimulatedBusSnapshot> _liveFirestoreBuses =
+      const <SimulatedBusSnapshot>[];
 
   gmaps.GoogleMapController? _googleController;
 
@@ -87,8 +95,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
   void initState() {
     super.initState();
     _useFallbackMap = !_supportsGoogleMaps;
-    _liveBusSimulator.start(fastForTesting: true);
-    _liveBusSimulator.liveBuses.addListener(_onLiveBusesChanged);
+    _subscribeToFirestoreBuses();
     _initialize();
   }
 
@@ -131,15 +138,89 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
     _currentLocation = LatLng(location.latitude, location.longitude);
   }
 
-  void _onLiveBusesChanged() => _refreshNearbyBuses();
+  void _subscribeToFirestoreBuses() {
+    _busesSubscription =
+        _firestore.collection('buses').snapshots().listen((snapshot) {
+      final parsed = <SimulatedBusSnapshot>[];
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+
+        final latitude = _readDouble(data['latitude']);
+        final longitude = _readDouble(data['longitude']);
+
+        if (latitude == null || longitude == null) {
+          continue;
+        }
+
+        final routeId = _readString(data['routeId']) ?? '';
+        final fallbackRoute = BusRoutesRepository.allRoutes.first;
+        final route = routeId.isNotEmpty
+            ? BusRoutesRepository.getRouteById(routeId)
+            : null;
+
+        final resolvedRoute = route ?? fallbackRoute;
+        final routeNumber =
+            _readString(data['routeNumber']) ?? resolvedRoute.routeNumber;
+        final routeName =
+            _readString(data['routeName']) ?? 'Live Bus ${doc.id}';
+        final speedMps = _readDouble(data['speed']) ?? 0;
+        final etaToNextStopMinutes = speedMps <= 0 ? 0 : 1;
+
+        debugPrint(
+          '[PassengerMap] Bus ${doc.id} -> lat=$latitude, lon=$longitude',
+        );
+
+        parsed.add(
+          SimulatedBusSnapshot(
+            busId: doc.id,
+            routeId: resolvedRoute.id,
+            routeNumber: routeNumber,
+            routeName: routeName,
+            latitude: latitude,
+            longitude: longitude,
+            currentStopIndex: 0,
+            nextStopIndex: 0,
+            currentStopName: 'Live Position',
+            nextStopName: 'Updating',
+            etaToNextStopMinutes: etaToNextStopMinutes,
+            occupancyPercent: 0,
+          ),
+        );
+      }
+
+      debugPrint('[PassengerMap] Firestore buses fetched: ${parsed.length}');
+
+      if (!mounted) {
+        _liveFirestoreBuses = parsed;
+        return;
+      }
+
+      setState(() {
+        _liveFirestoreBuses = parsed;
+      });
+      _refreshNearbyBuses();
+    }, onError: (Object error) {
+      debugPrint('[PassengerMap] Firestore buses stream error: $error');
+    });
+  }
 
   void _refreshNearbyBuses() {
-    final nearby = _liveBusSimulator.nearbyBuses(
-      latitude: _searchedLocation.latitude,
-      longitude: _searchedLocation.longitude,
-      radiusKm: 18,
-      limit: 12,
-    );
+    // Demo mode: show all Firestore buses without distance-based filtering.
+    final nearby = _liveFirestoreBuses
+        .map(
+          (snapshot) => NearbyBusEntry(
+            snapshot: snapshot,
+            distanceKm: _distance.as(
+              LengthUnit.Kilometer,
+              _currentLocation,
+              LatLng(snapshot.latitude, snapshot.longitude),
+            ),
+          ),
+        )
+        .toList(growable: false);
+
+    debugPrint('[PassengerMap] Buses used for map rendering: ${nearby.length}');
 
     nearby.sort(
       (a, b) =>
@@ -167,6 +248,24 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
       }
       _selectedBus ??= nearby.isNotEmpty ? nearby.first.snapshot : null;
     });
+
+    if (_useFallbackMap && nearby.isNotEmpty) {
+      final firstBus = nearby.first.snapshot;
+      _fallbackController.move(
+        LatLng(firstBus.latitude, firstBus.longitude),
+        14.2,
+      );
+    }
+
+    for (final entry in nearby) {
+      unawaited(
+        LocalBusAlertNotificationService.instance.maybeNotifyBusApproaching(
+          busId: entry.snapshot.busId,
+          distanceKm: entry.distanceKm,
+          etaMinutes: entry.snapshot.etaToNextStopMinutes,
+        ),
+      );
+    }
   }
 
   List<BusRoute> _buildSuggestedRoutes(List<NearbyBusEntry> nearby) {
@@ -471,7 +570,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
 
   Widget _liveBusesPanel(BuildContext context) {
     if (_nearbyBuses.isEmpty) {
-      return const Text('No live buses found nearby yet.',
+      return const Text('No live buses found in Firestore yet.',
           style: TextStyle(color: Colors.white70));
     }
 
@@ -579,7 +678,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
 
   @override
   void dispose() {
-    _liveBusSimulator.liveBuses.removeListener(_onLiveBusesChanged);
+    _busesSubscription?.cancel();
     _searchController.dispose();
     _panelController.dispose();
     super.dispose();
@@ -591,7 +690,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chandigarh Live Bus Map'),
+        title: const BrandedAppBarTitle(title: 'Chandigarh Live Bus Map'),
         actions: [
           IconButton(
             icon: Icon(_useFallbackMap ? Icons.layers : Icons.public),
@@ -687,7 +786,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Fast test mode: moving buses update quickly',
+                                'Live Firestore stream: buses collection updates in real-time',
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                             ],
@@ -813,6 +912,20 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
             ),
     );
   }
+}
+
+double? _readDouble(dynamic value) {
+  if (value is num) {
+    return value.toDouble();
+  }
+  return null;
+}
+
+String? _readString(dynamic value) {
+  if (value is String && value.trim().isNotEmpty) {
+    return value;
+  }
+  return null;
 }
 
 class _NearbyStopEntry {

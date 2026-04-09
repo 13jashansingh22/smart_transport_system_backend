@@ -7,6 +7,7 @@ import '../models/bus_routes_repository.dart';
 import '../services/firestore_bus_location_service.dart';
 import '../services/smart_transport_ai_service.dart';
 import '../services/user_profile_context_service.dart';
+import '../widgets/branded_app_bar_title.dart';
 
 class DriverScreen extends StatefulWidget {
   const DriverScreen({super.key});
@@ -82,7 +83,7 @@ class _DriverScreenState extends State<DriverScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Driver Command Center'),
+        title: const BrandedAppBarTitle(title: 'Driver Command Center'),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/help'),
@@ -273,12 +274,15 @@ class _DriverScreenState extends State<DriverScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.drive_eta_rounded,
-                  color: Color(0xFF271900),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -558,11 +562,24 @@ class _DriverScreenState extends State<DriverScreen> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
+                          if (tracking) {
+                            debugPrint(
+                              '[DriverScreen] Start Trip ignored: periodic location updates already running.',
+                            );
+                            return;
+                          }
+
+                          debugPrint(
+                            '[DriverScreen] Start Trip pressed. Starting periodic Firestore location updates.',
+                          );
                           setState(() => tracking = true);
                           firestoreLocationService.startPeriodicUpdates(
                             interval: const Duration(seconds: 5),
-                            busDocumentId: 'bus_1',
+                            busDocumentId: 'bus101',
                             onLocationUpdated: (latitude, longitude, speed) {
+                              debugPrint(
+                                '[DriverScreen] Location update sent: lat=$latitude, lon=$longitude, speed=${speed.toStringAsFixed(2)} m/s',
+                              );
                               if (!mounted) {
                                 return;
                               }
@@ -592,6 +609,16 @@ class _DriverScreenState extends State<DriverScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
+                          if (!tracking) {
+                            debugPrint(
+                              '[DriverScreen] Stop Trip ignored: periodic location updates are not running.',
+                            );
+                            return;
+                          }
+
+                          debugPrint(
+                            '[DriverScreen] Stop Trip pressed. Stopping periodic Firestore location updates.',
+                          );
                           setState(() => tracking = false);
                           firestoreLocationService.stopPeriodicUpdates();
                           service.addTripHistory(

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/bus_routes_repository.dart';
 import '../services/smart_transport_ai_service.dart';
 import '../services/user_profile_context_service.dart';
+import '../widgets/branded_app_bar_title.dart';
 
 class PassengerScreen extends StatelessWidget {
   const PassengerScreen({super.key});
@@ -268,7 +269,7 @@ class PassengerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Passenger Command Center'),
+        title: const BrandedAppBarTitle(title: 'Passenger Command Center'),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/chatbot'),
@@ -281,7 +282,17 @@ class PassengerScreen extends StatelessWidget {
           child: ListView(
             children: [
               ListTile(
-                leading: Icon(Icons.directions_bus, color: colorScheme.primary),
+                leading: SizedBox(
+                  width: 34,
+                  height: 34,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
                 title: const Text('Passenger Navigation'),
                 subtitle: const Text('Features arranged in sequence'),
               ),
